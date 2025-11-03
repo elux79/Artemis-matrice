@@ -17,22 +17,21 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:20
 .row label{flex:1;font-size:13px}
 .row input,.row select{width:120px;padding:6px 8px;border:1px solid #ced4da;border-radius:4px;font-size:13px}
 .row input:focus,.row select:focus{border-color:#007bff;outline:none;box-shadow:0 0 0 2px rgba(0,123,255,0.25)}
-.results{font-family:'Courier New',monospace;font-size:12px;line-height:1.4;background:#f8f9fa;padding:15px;border-radius:4px;white-space:pre-line}
+.results{font-family:'Courier New',monospace;font-size:12px;line-height:1.4;background:#f8f9fa;padding:15px;border-radius:4px;white-space:pre-line;margin-bottom:15px}
 .validation{background:#d4edda;border:1px solid #c3e6cb;padding:15px;border-radius:4px;margin-top:15px}
 .validation.error{background:#f8d7da;border-color:#f5c6cb}
 .validation.simulation{background:#d1ecf1;border-color:#bee5eb}
 .ok{color:#155724;font-weight:bold}
 .error{color:#721c24;font-weight:bold}
 .info{color:#0c5460;font-weight:bold}
-.mode-indicator{background:#17a2b8;color:white;padding:8px 12px;border-radius:4px;font-weight:bold;margin:10px 0;font-size:12px}
-.liquidity-warning{background:#fff3cd;border:1px solid:#ffeaa7;color:#856404;padding:8px;border-radius:4px;margin:5px 0;font-size:11px}
+.impots-dynamic{background:#e3f2fd;border:1px solid:#90caf9;padding:8px;border-radius:4px;margin:5px 0;font-size:11px;color:#1565c0}
 </style>
 </head>
 <body>
 
 <div class="header">
   <h1>Artémis Simulateur - Décisions Firme 3</h1>
-  <div class="subtitle">Validation P0 / Simulation P1+ avec impôts dynamiques et trésorerie complète</div>
+  <div class="subtitle">Impôts dynamiques selon vos décisions | Trésorerie complète</div>
 </div>
 
 <div class="grid">
@@ -47,7 +46,6 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:20
         <option value="P1">P1+ - Simulation (IS 32%)</option>
       </select>
     </div>
-    <div id="mode_indicator" class="mode-indicator"></div>
     
     <h3>Produit Silis</h3>
     <div class="row"><label>Prix de vente (€)</label><input id="prix_silis" type="number" step="1" value="530"></div>
@@ -92,6 +90,8 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:20
     <div class="row"><label>Emprunt long terme (6 trimestres) (k€)</label><input id="emprunt_lt" type="number" step="1" value="0"></div>
     <div class="row"><label>Escompte client (%)</label><input id="escompte_client" type="number" step="0.1" value="0"></div>
     <div class="row"><label>Effets escomptés bancaires (k€)</label><input id="effets_escomptes" type="number" step="1" value="0"></div>
+
+    <div id="impots_info" class="impots-dynamic"></div>
   </div>
 
   <div class="card">
@@ -149,7 +149,7 @@ function recalculer() {
   const P0_CREANCES = 22525
   const P0_DETTES_FOURN = 9000
 
-  // Lecture des inputs
+  // Lecture des inputs (ORDRE EXACT PRÉSERVÉ)
   const mode_periode = document.getElementById('mode_periode').value
   const prix_silis = +document.getElementById('prix_silis').value
   const com_silis = +document.getElementById('com_silis').value
@@ -178,16 +178,12 @@ function recalculer() {
   const emprunt_lt = +document.getElementById('emprunt_lt').value
   const escompte_client = +document.getElementById('escompte_client').value
 
-  // Indicateur de mode
-  document.getElementById('mode_indicator').textContent = 
-    mode_periode === 'P0' ? '🔒 MODE P0 - VALIDATION HISTORIQUE' : '🚀 MODE P1+ - SIMULATION DYNAMIQUE'
-
   const nbUsines = n_stand + n_green
   
   // === CALCULS COMPTE DE RÉSULTAT ===
   
   const ca_silis = (prix_silis * P0_VENTES_SILIS) / 1000
-  const ca_exolis = (prix_exolis * 0) / 1000 // Pas de ventes Exolis en P0
+  const ca_exolis = (prix_exolis * 0) / 1000
   const ca_total = ca_silis + ca_exolis
   
   const mp_consommees = (P0_MP_COUT_UNITAIRE * prod_silis) / 1000
@@ -235,43 +231,46 @@ function recalculer() {
   const frais_financiers = P0_ENCOURS_LT * 0.06 / 4
   const resultat_avant_impot = resultat_operationnel - frais_financiers
   
-  // CALCUL IMPÔTS SELON MODE
-  let impots_finaux, mode_label
+  // === CALCUL IMPÔTS DYNAMIQUES SELON VOS DÉCISIONS ===
+  let impots_finaux, mode_label, info_impots
   
   if (mode_periode === 'P0') {
     impots_finaux = -203
     mode_label = 'Impôts (P0 historique)'
+    info_impots = '🔒 Mode P0 : Impôts fixes à -203 K€ pour validation exacte'
   } else {
+    // MODE P1+ : IMPÔTS DYNAMIQUES SELON VOS DÉCISIONS
     if (resultat_avant_impot > 0) {
       impots_finaux = resultat_avant_impot * 0.32
       mode_label = 'Impôts sur Sociétés (32%)'
+      info_impots = `🧮 Calcul automatique : ${formatNumber(resultat_avant_impot)} × 32% = ${formatNumber(impots_finaux)} K€`
     } else {
       impots_finaux = 0
       mode_label = 'Impôts sur Sociétés (0% - perte)'
+      info_impots = `💸 Résultat déficitaire : Aucun impôt à payer (${formatNumber(resultat_avant_impot)} K€)`
     }
   }
   
   const resultat_net = resultat_avant_impot - impots_finaux
 
+  // Affichage info impôts
+  document.getElementById('impots_info').textContent = info_impots
+
   // === CALCULS TRÉSORERIE ===
   
-  // Achats MP période avec barème dégressif
   const total_mp_achetees = mp_stand + mp_green
   const coeff_degressif = getBaremeMP(total_mp_achetees)
   const cout_achats_mp = ((180 * mp_stand + 280 * mp_green) * coeff_degressif) / 1000
   const achats_comptant = cout_achats_mp * 0.5
   
-  // Ventes comptant + escompte
   const ventes_comptant_base = ca_total * 0.5
-  const ventes_escompte = ca_total * 0.5 * (escompte_client / 100) * 0.15 // 15% acceptation
+  const ventes_escompte = ca_total * 0.5 * (escompte_client / 100) * 0.15
   const ventes_comptant_total = ventes_comptant_base + ventes_escompte
   
-  // Investissements et cessions usines
   const investissements_usines = (achat_stand + achat_green) * 8000
   const cessions_usines = (vente_stand + vente_green) * 8000
   const cout_licenciement = (vente_stand * 600) + (vente_green * 900)
   
-  // Flux opérationnels
   const encaissements_op = P0_CREANCES + ventes_comptant_total + cessions_usines
   const decaissements_production = energie + qual_silis + qual_exolis + dd_silis + dd_exolis + 
                                   idh + main_oeuvre + encadrement + rd_stand + rd_green
@@ -283,12 +282,10 @@ function recalculer() {
   
   const cashflow_op_net = encaissements_op - decaissements_op
   
-  // Flux financiers
   const remb_lt = 1250
-  const nouveaux_frais_fin = (emprunt_ct * 0.20 / 4) + (emprunt_lt * 0.06 / 4) // CT 20%, LT 6%
+  const nouveaux_frais_fin = (emprunt_ct * 0.20 / 4) + (emprunt_lt * 0.06 / 4)
   const cashflow_fin_net = emprunt_ct + emprunt_lt - remb_lt - frais_financiers - nouveaux_frais_fin
   
-  // Trésorerie finale
   const tresorerie_finale = P0_CASH_OPEN + cashflow_op_net + cashflow_fin_net
 
   // === AFFICHAGE RÉSULTATS ===
@@ -343,7 +340,7 @@ Cash Flow Net : ${formatNumber(cashflow_op_net + cashflow_fin_net)} K€
 
 TRÉSORERIE FIN PÉRIODE : ${formatNumber(tresorerie_finale)} K€`
 
-  // Validation avec alertes liquidité
+  // Validation
   if (mode_periode === 'P0') {
     const validation_ok = Math.abs(resultat_net + 1331) <= 1
     document.getElementById('validation_gate').innerHTML = 
@@ -359,30 +356,20 @@ TRÉSORERIE FIN PÉRIODE : ${formatNumber(tresorerie_finale)} K€`
   } else {
     const rentable = resultat_net > 0
     const tresorerie_saine = tresorerie_finale > 1000
-    const seuil_equilibre = 547.5
-    
-    let alerte_liquidite = ''
-    if (tresorerie_finale < 0) {
-      alerte_liquidite = `<div class="liquidity-warning">⚠️ ALERTE LIQUIDITÉ: Trésorerie négative. Solutions: réduire achats MP, activer escompte client, emprunt CT</div>`
-    } else if (tresorerie_finale < 1000) {
-      alerte_liquidite = `<div class="liquidity-warning">⚠️ Trésorerie faible. Surveiller les flux P2</div>`
-    }
     
     document.getElementById('validation_gate').innerHTML = 
       `<div class="validation simulation">
         <strong>🚀 Simulation P1+ : ${rentable ? 'STRATÉGIE RENTABLE ✅' : 'OPTIMISATION NÉCESSAIRE ⚠️'}</strong>
         <div class="info">
           Résultat Net: ${formatNumber(resultat_net)} K€
-          ${resultat_avant_impot > 0 ? `(IS payé: ${formatNumber(impots_finaux)} K€)` : '(Aucun impôt sur perte)'}
+          ${resultat_avant_impot > 0 ? `(IS calculé: ${formatNumber(impots_finaux)} K€)` : '(Aucun impôt sur perte)'}
         </div>
         <div class="info" style="margin-top:8px">
           Trésorerie finale: ${formatNumber(tresorerie_finale)} K€ ${tresorerie_saine ? '✅' : '⚠️'}
         </div>
         <div style="margin-top:8px;font-size:11px">
-          Prix actuel: ${prix_silis}€ | Seuil équilibre: ${seuil_equilibre}€
-          ${prix_silis >= seuil_equilibre ? '✅' : '⚠️ Prix insuffisant'}
+          💡 Les impôts varient automatiquement selon vos décisions (32% sur bénéfices)
         </div>
-        ${alerte_liquidite}
       </div>`
   }
 }
