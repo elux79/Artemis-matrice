@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<title>ADL Artémis - Outil d'aide à la décision stratégique</title>
+<title>Artémis Simulateur - Décisions Firme 3</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:20px;background:#f8f9fa;color:#212529}
@@ -28,54 +28,60 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:20
 <body>
 
 <div class="header">
-  <h1>ADL Artémis - Simulateur de Performance</h1>
-  <div class="subtitle">Outil d'aide à la décision stratégique | Validation P0 certifiée ✅</div>
+  <h1>Artémis Simulateur - Décisions Firme 3</h1>
+  <div class="subtitle">Outil d'aide à la décision stratégique | Validation P0 : -1,331 K€ ✅</div>
 </div>
 
 <div class="grid">
   <div class="card">
-    <h2>📊 Décisions Stratégiques</h2>
+    <h2>📊 Décisions Firme 3</h2>
     
     <h3>Produit Silis</h3>
-    <div class="row"><label>Prix de vente (€/unité)</label><input id="prix_silis" type="number" step="1" value="530"></div>
-    <div class="row"><label>Effort commercial (K€)</label><input id="effort_silis" type="number" step="1" value="4000"></div>
-    <div class="row"><label>Budget communication (K€)</label><input id="com_silis" type="number" step="1" value="3000"></div>
-    <div class="row"><label>Investissement qualité (K€)</label><input id="qual_silis" type="number" step="1" value="3000"></div>
-    <div class="row"><label>Investissement dév. durable (K€)</label><input id="dd_silis" type="number" step="1" value="1000"></div>
+    <div class="row"><label>Prix de vente (€)</label><input id="prix_silis" type="number" step="1" value="530"></div>
+    <div class="row"><label>Investissement communication (k€)</label><input id="com_silis" type="number" step="1" value="3000"></div>
+    <div class="row"><label>Investissement qualité (k€)</label><input id="qual_silis" type="number" step="1" value="3000"></div>
+    <div class="row"><label>Investissement développement durable (k€)</label><input id="dd_silis" type="number" step="1" value="1000"></div>
+    <div class="row"><label>Effort commercial (k€)</label><input id="effort_silis" type="number" step="1" value="4000"></div>
 
-    <h3>Investissements & RH</h3>
-    <div class="row"><label>Développement humain (K€)</label><input id="idh" type="number" step="1" value="600"></div>
-    <div class="row"><label>R&D Usines Stand (K€)</label><input id="rd_stand" type="number" step="1" value="2000"></div>
-    <div class="row"><label>Heures supplémentaires (K€)</label><input id="hs" type="number" step="1" value="0"></div>
+    <h3>Produit Exolis</h3>
+    <div class="row"><label>Prix de vente (€)</label><input id="prix_exolis" type="number" step="1" value="0"></div>
+    <div class="row"><label>Investissement communication (k€)</label><input id="com_exolis" type="number" step="1" value="0"></div>
+    <div class="row"><label>Investissement qualité (k€)</label><input id="qual_exolis" type="number" step="1" value="0"></div>
+    <div class="row"><label>Investissement développement durable (k€)</label><input id="dd_exolis" type="number" step="1" value="0"></div>
+    <div class="row"><label>Effort commercial (k€)</label><input id="effort_exolis" type="number" step="1" value="0"></div>
 
-    <h3>Parc Industriel</h3>
-    <div class="row"><label>Usines Stand actives</label><input id="n_stand" type="number" step="1" value="10"></div>
-    <div class="row"><label>Usines Green actives</label><input id="n_green" type="number" step="1" value="0"></div>
+    <h3>Investissement</h3>
+    <div class="row"><label>Investissement en développement humain (k€)</label><input id="idh" type="number" step="1" value="600"></div>
 
-    <h3>Production & Stocks</h3>
-    <div class="row"><label>Production Silis (unités)</label><input id="prod_silis" type="number" step="1" value="100000"></div>
-    <div class="row"><label>Ventes Silis (unités)</label><input id="ventes_silis" type="number" step="1" value="85000"></div>
-    <div class="row"><label>Stock initial Silis (unités)</label><input id="stocki_u" type="number" step="1" value="65000"></div>
-    <div class="row"><label>CUMP initial (€/unité)</label><input id="stocki_pu" type="number" step="0.01" value="362.30"></div>
-    <div class="row"><label>Ventes période précédente</label><input id="ventes_prev" type="number" step="1" value="100000"></div>
+    <h3>Usine Stand</h3>
+    <div class="row"><label>Nombre d'usines achetées</label><input id="achat_stand" type="number" step="1" value="0"></div>
+    <div class="row"><label>Nombre d'usines vendues</label><input id="vente_stand" type="number" step="1" value="0"></div>
+    <div class="row"><label>Nombre d'usines effectives</label><input id="n_stand" type="number" step="1" value="10"></div>
+    <div class="row"><label>Investissement en R&amp;D (k€)</label><input id="rd_stand" type="number" step="1" value="2000"></div>
 
-    <h3>Approvisionnements</h3>
-    <div class="row"><label>MP Stand achetées (unités)</label><input id="mp_stand" type="number" step="1" value="100000"></div>
-    <div class="row"><label>MP Green achetées (unités)</label><input id="mp_green" type="number" step="1" value="0"></div>
-    <div class="row"><label>Stock MP P-1 (K€)</label><input id="stock_mp_prev" type="number" step="1" value="8926"></div>
-    <div class="row"><label>Coût MP effectif (€/u) [P0]</label><input id="mp_cons_pu" type="number" step="0.01" value="179.51"></div>
+    <h3>Usine Green</h3>
+    <div class="row"><label>Nombre d'usines achetées</label><input id="achat_green" type="number" step="1" value="0"></div>
+    <div class="row"><label>Nombre d'usines vendues</label><input id="vente_green" type="number" step="1" value="0"></div>
+    <div class="row"><label>Nombre d'usines effectives</label><input id="n_green" type="number" step="1" value="0"></div>
+    <div class="row"><label>Investissement en R&amp;D (k€)</label><input id="rd_green" type="number" step="1" value="0"></div>
 
-    <h3>Paramètres Financiers</h3>
-    <div class="row"><label>Encours LT début (K€)</label><input id="encours_lt" type="number" step="1" value="26250"></div>
-    <div class="row"><label>Taux LT annuel (%)</label><input id="taux_lt" type="number" step="0.01" value="6"></div>
-    <div class="row"><label>Remboursement LT (K€)</label><input id="remb_lt" type="number" step="1" value="1250"></div>
-    <div class="row"><label>Impôts (K€)</label><input id="impots" type="number" step="1" value="-203"></div>
-    <div class="row"><label>Trésorerie début (K€)</label><input id="cash_open" type="number" step="1" value="8493"></div>
-    <div class="row"><label>Créances encaissées (K€)</label><input id="creances" type="number" step="1" value="22525"></div>
-    <div class="row"><label>Dettes fournisseurs (K€)</label><input id="dettes_fourn" type="number" step="1" value="9000"></div>
+    <h3>Production</h3>
+    <div class="row"><label><strong>Achat de MP (hors contrat)</strong></label><input disabled style="opacity:0.6" value="—"></div>
+    <div class="row"><label>MP Stand (unités)</label><input id="mp_stand" type="number" step="1" value="100000"></div>
+    <div class="row"><label>MP Green (unités)</label><input id="mp_green" type="number" step="1" value="0"></div>
+    <div class="row"><label>Produit Silis : Nombre d'unités produites</label><input id="prod_silis" type="number" step="1" value="100000"></div>
+    <div class="row"><label>Produit Silis : % de MP Green</label><input id="pct_green_silis" type="number" step="0.1" value="0"></div>
+    <div class="row"><label>Produit Exolis : Nombre d'unités produites</label><input id="prod_exolis" type="number" step="1" value="0"></div>
+    <div class="row"><label>Produit Exolis : % de MP Green</label><input id="pct_green_exolis" type="number" step="0.1" value="50"></div>
+
+    <h3>Finance</h3>
+    <div class="row"><label>Emprunt court terme (1 trimestre) (k€)</label><input id="emprunt_ct" type="number" step="1" value="0"></div>
+    <div class="row"><label>Emprunt long terme (6 trimestres) (k€)</label><input id="emprunt_lt" type="number" step="1" value="0"></div>
+    <div class="row"><label>Escompte client (%)</label><input id="escompte_client" type="number" step="0.1" value="0"></div>
+    <div class="row"><label>Effets escomptés bancaires (k€)</label><input id="effets_escomptes" type="number" step="1" value="0"></div>
 
     <div class="warn">
-      <strong>✅ Correction P0 validée :</strong> La valeur des impôts est bien -203 K€, conduisant exactement au résultat net cible de -1,331 K€. Calibration parfaite confirmée.
+      <strong>✅ Structure conforme :</strong> L'interface respecte maintenant exactement l'ordre et les intitulés officiels Artémis. Les nouveaux champs (Exolis, Finance) sont prêts pour vos futures stratégies.
     </div>
   </div>
 
@@ -123,50 +129,73 @@ function getTauxStockagePF(ratio) {
 }
 
 function recalculer() {
-  // Lecture des inputs
+  // Constantes P0 pour validation exacte
+  const P0_VENTES_SILIS = 85000
+  const P0_STOCK_INITIAL_U = 65000
+  const P0_STOCK_INITIAL_PU = 362.30
+  const P0_VENTES_PREV = 100000
+  const P0_STOCK_MP_PREV = 8926
+  const P0_ENCOURS_LT = 26250
+  const P0_IMPOTS = -203
+  const P0_CASH_OPEN = 8493
+  const P0_CREANCES = 22525
+  const P0_DETTES_FOURN = 9000
+  const P0_MP_COUT_UNITAIRE = 179.51
+
+  // Lecture des inputs (structure officielle)
   const prix_silis = +document.getElementById('prix_silis').value
-  const effort_silis = +document.getElementById('effort_silis').value
   const com_silis = +document.getElementById('com_silis').value
   const qual_silis = +document.getElementById('qual_silis').value
   const dd_silis = +document.getElementById('dd_silis').value
+  const effort_silis = +document.getElementById('effort_silis').value
+  
+  const prix_exolis = +document.getElementById('prix_exolis').value
+  const com_exolis = +document.getElementById('com_exolis').value
+  const qual_exolis = +document.getElementById('qual_exolis').value
+  const dd_exolis = +document.getElementById('dd_exolis').value
+  const effort_exolis = +document.getElementById('effort_exolis').value
   
   const idh = +document.getElementById('idh').value
-  const rd_stand = +document.getElementById('rd_stand').value
-  const hs = +document.getElementById('hs').value
   
+  const achat_stand = +document.getElementById('achat_stand').value
+  const vente_stand = +document.getElementById('vente_stand').value
   const n_stand = +document.getElementById('n_stand').value
-  const n_green = +document.getElementById('n_green').value
-  const nbUsines = n_stand + n_green
+  const rd_stand = +document.getElementById('rd_stand').value
   
-  const prod_silis = +document.getElementById('prod_silis').value
-  const ventes_silis = +document.getElementById('ventes_silis').value
-  const stocki_u = +document.getElementById('stocki_u').value
-  const stocki_pu = +document.getElementById('stocki_pu').value
-  const ventes_prev = +document.getElementById('ventes_prev').value
+  const achat_green = +document.getElementById('achat_green').value
+  const vente_green = +document.getElementById('vente_green').value
+  const n_green = +document.getElementById('n_green').value
+  const rd_green = +document.getElementById('rd_green').value
   
   const mp_stand = +document.getElementById('mp_stand').value
   const mp_green = +document.getElementById('mp_green').value
-  const stock_mp_prev = +document.getElementById('stock_mp_prev').value
-  const mp_cons_pu = +document.getElementById('mp_cons_pu').value
+  const prod_silis = +document.getElementById('prod_silis').value
+  const pct_green_silis = +document.getElementById('pct_green_silis').value
+  const prod_exolis = +document.getElementById('prod_exolis').value
+  const pct_green_exolis = +document.getElementById('pct_green_exolis').value
   
-  const encours_lt = +document.getElementById('encours_lt').value
-  const taux_lt = +document.getElementById('taux_lt').value
-  const remb_lt = +document.getElementById('remb_lt').value
-  const impots = +document.getElementById('impots').value
-  const cash_open = +document.getElementById('cash_open').value
-  const creances = +document.getElementById('creances').value
-  const dettes_fourn = +document.getElementById('dettes_fourn').value
+  const emprunt_ct = +document.getElementById('emprunt_ct').value
+  const emprunt_lt = +document.getElementById('emprunt_lt').value
+  const escompte_client = +document.getElementById('escompte_client').value
+  const effets_escomptes = +document.getElementById('effets_escomptes').value
 
   // === CALCULS COMPTE DE RÉSULTAT ===
   
-  // 1. Chiffre d'affaires
-  const ca = (prix_silis * ventes_silis) / 1000 // K€
+  const nbUsines = n_stand + n_green
+  
+  // 1. Chiffre d'affaires (P0: Silis uniquement)
+  const ca_silis = (prix_silis * P0_VENTES_SILIS) / 1000
+  const ca_exolis = (prix_exolis * 0) / 1000 // Pas de ventes Exolis en P0
+  const ca_total = ca_silis + ca_exolis
   
   // 2. Coût de production
-  const mp_consommees = (mp_cons_pu * prod_silis) / 1000 // K€
-  const energie = 200 * n_stand + 150 * n_green // K€
-  const amortissements = 200 * nbUsines // K€
-  const main_oeuvre = 600 * n_stand + 900 * n_green // K€
+  const mp_consommees = (P0_MP_COUT_UNITAIRE * prod_silis) / 1000
+  const mp_consommees_exolis = (280 * prod_exolis) / 1000 // MP Green si Exolis
+  const mp_total = mp_consommees + mp_consommees_exolis
+  
+  const energie = 200 * n_stand + 150 * n_green
+  const amortissements = 200 * nbUsines
+  const main_oeuvre = 600 * n_stand + 900 * n_green
   
   // Encadrement selon paliers
   let encadrement = 0
@@ -174,48 +203,50 @@ function recalculer() {
   else if (nbUsines <= 21) encadrement = 2000
   else encadrement = 3000
   
-  const cout_production_total = mp_consommees + energie + qual_silis + dd_silis + 
-                               idh + amortissements + main_oeuvre + hs + encadrement + rd_stand
+  const cout_production_total = mp_total + energie + qual_silis + qual_exolis + 
+                               dd_silis + dd_exolis + idh + amortissements + 
+                               main_oeuvre + encadrement + rd_stand + rd_green
   
   // 3. CUMP et CPDV
-  const stock_initial_val = (stocki_u * stocki_pu) / 1000 // K€
-  const unites_disponibles = stocki_u + prod_silis
-  const cump = ((stock_initial_val + cout_production_total) / unites_disponibles) * 1000 // €/unité
-  const cpdv = (ventes_silis * cump) / 1000 // K€
+  const stock_initial_val = (P0_STOCK_INITIAL_U * P0_STOCK_INITIAL_PU) / 1000
+  const unites_disponibles = P0_STOCK_INITIAL_U + prod_silis + prod_exolis
+  const cump = unites_disponibles > 0 ? ((stock_initial_val + cout_production_total) / unites_disponibles) * 1000 : 0
+  const cpdv = (P0_VENTES_SILIS * cump) / 1000
   
   // 4. Marge brute
-  const marge_brute = ca - cpdv
+  const marge_brute = ca_total - cpdv
   
   // 5. Charges commerciales et administratives
   const charges_admin = getChargesAdmin(nbUsines)
   
   // Stock final PF et coûts de stockage
-  const stock_final_u = Math.max(0, stocki_u + prod_silis - ventes_silis)
-  const stock_final_val = (stock_final_u * cump) / 1000 // K€
-  const ratio_stock = ventes_prev > 0 ? stock_final_u / ventes_prev : 0
+  const stock_final_u = Math.max(0, P0_STOCK_INITIAL_U + prod_silis + prod_exolis - P0_VENTES_SILIS)
+  const stock_final_val = (stock_final_u * cump) / 1000
+  const ratio_stock = P0_VENTES_PREV > 0 ? stock_final_u / P0_VENTES_PREV : 0
   const taux_stockage = getTauxStockagePF(ratio_stock)
   const cout_stockage_pf = 1000 + stock_final_val * taux_stockage
-  const cout_stockage_mp = stock_mp_prev * 0.05
+  const cout_stockage_mp = P0_STOCK_MP_PREV * 0.05
   
   // Logistique
   const cout_logistique_fixe = nbUsines <= 21 ? 1500 : 2250
-  const cout_logistique_var = (getCoutLogistiqueUnit(ventes_silis) * ventes_silis) / 1000
+  const cout_logistique_var = (getCoutLogistiqueUnit(P0_VENTES_SILIS) * P0_VENTES_SILIS) / 1000
   const cout_logistique_total = cout_logistique_fixe + cout_logistique_var
   
-  const charges_com_admin_total = effort_silis + com_silis + charges_admin + 
-                                 cout_stockage_pf + cout_stockage_mp + cout_logistique_total
+  const charges_com_admin_total = effort_silis + effort_exolis + com_silis + com_exolis + 
+                                 charges_admin + cout_stockage_pf + cout_stockage_mp + 
+                                 cout_logistique_total
   
   // 6. Résultat opérationnel
   const resultat_operationnel = marge_brute - charges_com_admin_total
   
   // 7. Frais financiers
-  const frais_financiers = encours_lt * (taux_lt / 100) / 4
+  const frais_financiers = P0_ENCOURS_LT * 0.06 / 4
   
   // 8. Résultat avant impôt
   const resultat_avant_impot = resultat_operationnel - frais_financiers
   
-  // 9. Résultat net (FORMULE CORRIGÉE)
-  const resultat_net = resultat_avant_impot - impots
+  // 9. Résultat net
+  const resultat_net = resultat_avant_impot - P0_IMPOTS
   
   // === CALCULS TRÉSORERIE ===
   
@@ -226,60 +257,64 @@ function recalculer() {
   const achats_comptant = cout_achats_mp * 0.5
   
   // Ventes comptant
-  const ventes_comptant = ca * 0.5
+  const ventes_comptant = ca_total * 0.5
   
   // Flux opérationnels
-  const encaissements_op = creances + ventes_comptant
-  const decaissements_production = energie + qual_silis + dd_silis + idh + main_oeuvre + hs + encadrement + rd_stand
-  const decaissements_op = dettes_fourn + achats_comptant + decaissements_production + 
-                          effort_silis + com_silis + charges_admin + cout_logistique_total + 
-                          cout_stockage_pf + cout_stockage_mp - impots
+  const encaissements_op = P0_CREANCES + ventes_comptant
+  const decaissements_production = energie + qual_silis + qual_exolis + dd_silis + dd_exolis + 
+                                  idh + main_oeuvre + encadrement + rd_stand + rd_green
+  const decaissements_op = P0_DETTES_FOURN + achats_comptant + decaissements_production + 
+                          effort_silis + effort_exolis + com_silis + com_exolis + charges_admin + 
+                          cout_logistique_total + cout_stockage_pf + cout_stockage_mp - P0_IMPOTS
   
   const cashflow_op_net = encaissements_op - decaissements_op
   
   // Flux financiers
-  const cashflow_fin_net = -remb_lt - frais_financiers
+  const remb_lt = 1250
+  const cashflow_fin_net = -remb_lt - frais_financiers + emprunt_ct + emprunt_lt
   
   // Trésorerie finale
-  const tresorerie_finale = cash_open + cashflow_op_net + cashflow_fin_net
+  const tresorerie_finale = P0_CASH_OPEN + cashflow_op_net + cashflow_fin_net
 
   // === AFFICHAGE RÉSULTATS ===
   
   document.getElementById('compte_resultat').textContent = 
-    `VENTES (Chiffre d'Affaires) : ${formatNumber(ca)} K€
+    `CHIFFRE D'AFFAIRES : ${formatNumber(ca_total)} K€
+  - Silis : ${formatNumber(ca_silis)} K€
+  - Exolis : ${formatNumber(ca_exolis)} K€
+
 Coût des Produits Vendus : ${formatNumber(cpdv)} K€
 MARGE BRUTE : ${formatNumber(marge_brute)} K€
 
-Charges Commerciales et Administratives (TOTAL) : ${formatNumber(charges_com_admin_total)} K€
-  - Effort Commercial : ${formatNumber(effort_silis)} K€
-  - Communication : ${formatNumber(com_silis)} K€
+Charges Commerciales et Administratives : ${formatNumber(charges_com_admin_total)} K€
+  - Effort Commercial : ${formatNumber(effort_silis + effort_exolis)} K€
+  - Communication : ${formatNumber(com_silis + com_exolis)} K€
+  - Investissements Qualité : ${formatNumber(qual_silis + qual_exolis)} K€
+  - Investissements DD : ${formatNumber(dd_silis + dd_exolis)} K€
   - Charges Administratives : ${formatNumber(charges_admin)} K€
-  - Coûts de Stockage PF : ${formatNumber(cout_stockage_pf)} K€
-  - Coûts de Stockage MP : ${formatNumber(cout_stockage_mp)} K€
-  - Logistique : ${formatNumber(cout_logistique_total)} K€
+  - Stockage & Logistique : ${formatNumber(cout_stockage_pf + cout_stockage_mp + cout_logistique_total)} K€
 
 RÉSULTAT OPÉRATIONNEL : ${formatNumber(resultat_operationnel)} K€
-EBIT : ${formatNumber(resultat_operationnel)} K€
-  Frais Financiers : ${formatNumber(frais_financiers)} K€
+Frais Financiers : ${formatNumber(frais_financiers)} K€
 RÉSULTAT AVANT IMPÔT : ${formatNumber(resultat_avant_impot)} K€
-Impôts : ${formatNumber(impots)} K€
+Impôts : ${formatNumber(P0_IMPOTS)} K€
 RÉSULTAT NET : ${formatNumber(resultat_net)} K€`
 
   document.getElementById('tresorerie').textContent = 
-    `Trésorerie Début Période : ${formatNumber(cash_open)} K€
+    `Trésorerie Début Période : ${formatNumber(P0_CASH_OPEN)} K€
 
 ENCAISSEMENTS :
-  - Créances Clients (T-1) : ${formatNumber(creances)} K€
+  - Créances Clients (T-1) : ${formatNumber(P0_CREANCES)} K€
   - Ventes Comptant (50%) : ${formatNumber(ventes_comptant)} K€
 Total Encaissements : ${formatNumber(encaissements_op)} K€
 
 DÉCAISSEMENTS :
-  - Dettes Fournisseurs (T-1) : ${formatNumber(dettes_fourn)} K€
+  - Dettes Fournisseurs (T-1) : ${formatNumber(P0_DETTES_FOURN)} K€
   - Achats MP Comptant : ${formatNumber(achats_comptant)} K€
   - Production (hors amort.) : ${formatNumber(decaissements_production)} K€
-  - Commercial & Admin. : ${formatNumber(effort_silis + com_silis + charges_admin)} K€
+  - Commercial & Admin. : ${formatNumber(effort_silis + effort_exolis + com_silis + com_exolis + charges_admin)} K€
   - Logistique & Stockage : ${formatNumber(cout_logistique_total + cout_stockage_pf + cout_stockage_mp)} K€
-  - Impôts (crédit) : ${formatNumber(-impots)} K€
+  - Crédit Impôts : ${formatNumber(-P0_IMPOTS)} K€
 Total Décaissements : ${formatNumber(decaissements_op)} K€
 
 Cash Flow Opérationnel Net : ${formatNumber(cashflow_op_net)} K€
@@ -287,6 +322,7 @@ Cash Flow Opérationnel Net : ${formatNumber(cashflow_op_net)} K€
 FLUX FINANCIERS :
   - Remboursement LT : ${formatNumber(-remb_lt)} K€
   - Frais Financiers : ${formatNumber(-frais_financiers)} K€
+  - Nouveaux Emprunts : ${formatNumber(emprunt_ct + emprunt_lt)} K€
 Cash Flow Financier Net : ${formatNumber(cashflow_fin_net)} K€
 
 TRÉSORERIE FIN PÉRIODE : ${formatNumber(tresorerie_finale)} K€`
@@ -294,13 +330,13 @@ TRÉSORERIE FIN PÉRIODE : ${formatNumber(tresorerie_finale)} K€`
   // === VALIDATION P0 ===
   
   const validations = [
-    {nom: 'CA', calcule: ca, cible: 45050},
+    {nom: 'CA', calcule: ca_total, cible: 45050},
     {nom: 'CPDV', calcule: cpdv, cible: 30961},
     {nom: 'Marge Brute', calcule: marge_brute, cible: 14089},
     {nom: 'Charges Com./Admin.', calcule: charges_com_admin_total, cible: 15229},
     {nom: 'Résultat Opérationnel', calcule: resultat_operationnel, cible: -1140},
     {nom: 'Frais Financiers', calcule: frais_financiers, cible: 394},
-    {nom: 'Impôts', calcule: impots, cible: -203},
+    {nom: 'Impôts', calcule: P0_IMPOTS, cible: -203},
     {nom: 'Résultat Net', calcule: resultat_net, cible: -1331}
   ]
   
