@@ -25,13 +25,14 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:20
 .error{color:#721c24;font-weight:bold}
 .info{color:#0c5460;font-weight:bold}
 .mode-indicator{background:#17a2b8;color:white;padding:8px 12px;border-radius:4px;font-weight:bold;margin:10px 0;font-size:12px}
+.liquidity-warning{background:#fff3cd;border:1px solid:#ffeaa7;color:#856404;padding:8px;border-radius:4px;margin:5px 0;font-size:11px}
 </style>
 </head>
 <body>
 
 <div class="header">
   <h1>Artémis Simulateur - Décisions Firme 3</h1>
-  <div class="subtitle">Validation P0 / Simulation P1+ avec impôts dynamiques</div>
+  <div class="subtitle">Validation P0 / Simulation P1+ avec impôts dynamiques et trésorerie complète</div>
 </div>
 
 <div class="grid">
@@ -97,6 +98,9 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:20
     <h2>💰 Compte de Résultat</h2>
     <div id="compte_resultat" class="results"></div>
     
+    <h2>🏦 Flux de Trésorerie</h2>
+    <div id="tresorerie" class="results"></div>
+    
     <div id="validation_gate"></div>
   </div>
 </div>
@@ -104,10 +108,25 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:20
 <script>
 function formatNumber(x) { return Math.round(x).toLocaleString('fr-FR') }
 
+function getBaremeMP(totalUnits) {
+  if (totalUnits <= 140000) return 1.00
+  if (totalUnits <= 180000) return 0.97
+  if (totalUnits <= 220000) return 0.93
+  if (totalUnits <= 300000) return 0.89
+  return 0.85
+}
+
 function getChargesAdmin(nbUsines) {
   if (nbUsines <= 6) return 1000 + 100 * nbUsines
   if (nbUsines <= 21) return 2000 + 100 * nbUsines
   return 3000 + 100 * nbUsines
+}
+
+function getCoutLogistiqueUnit(unites) {
+  if (unites <= 100000) return 20
+  if (unites <= 150000) return 17
+  if (unites <= 200000) return 14
+  return 12
 }
 
 function getTauxStockagePF(ratio) {
@@ -118,6 +137,7 @@ function getTauxStockagePF(ratio) {
 }
 
 function recalculer() {
+  // Constantes P0 pour validation exacte
   const P0_VENTES_SILIS = 85000
   const P0_STOCK_INITIAL_U = 65000
   const P0_STOCK_INITIAL_PU = 362.30
@@ -125,7 +145,11 @@ function recalculer() {
   const P0_STOCK_MP_PREV = 8926
   const P0_ENCOURS_LT = 26250
   const P0_MP_COUT_UNITAIRE = 179.51
+  const P0_CASH_OPEN = 8493
+  const P0_CREANCES = 22525
+  const P0_DETTES_FOURN = 9000
 
+  // Lecture des inputs
   const mode_periode = document.getElementById('mode_periode').value
   const prix_silis = +document.getElementById('prix_silis').value
   const com_silis = +document.getElementById('com_silis').value
@@ -138,12 +162,21 @@ function recalculer() {
   const dd_exolis = +document.getElementById('dd_exolis').value
   const effort_exolis = +document.getElementById('effort_exolis').value
   const idh = +document.getElementById('idh').value
+  const achat_stand = +document.getElementById('achat_stand').value
+  const vente_stand = +document.getElementById('vente_stand').value
   const n_stand = +document.getElementById('n_stand').value
-  const n_green = +document.getElementById('n_green').value
   const rd_stand = +document.getElementById('rd_stand').value
+  const achat_green = +document.getElementById('achat_green').value
+  const vente_green = +document.getElementById('vente_green').value
+  const n_green = +document.getElementById('n_green').value
   const rd_green = +document.getElementById('rd_green').value
+  const mp_stand = +document.getElementById('mp_stand').value
+  const mp_green = +document.getElementById('mp_green').value
   const prod_silis = +document.getElementById('prod_silis').value
   const prod_exolis = +document.getElementById('prod_exolis').value
+  const emprunt_ct = +document.getElementById('emprunt_ct').value
+  const emprunt_lt = +document.getElementById('emprunt_lt').value
+  const escompte_client = +document.getElementById('escompte_client').value
 
   // Indicateur de mode
   document.getElementById('mode_indicator').textContent = 
@@ -151,9 +184,10 @@ function recalculer() {
 
   const nbUsines = n_stand + n_green
   
-  // Calculs compte de résultat
+  // === CALCULS COMPTE DE RÉSULTAT ===
+  
   const ca_silis = (prix_silis * P0_VENTES_SILIS) / 1000
-  const ca_exolis = (prix_exolis * 0) / 1000
+  const ca_exolis = (prix_exolis * 0) / 1000 // Pas de ventes Exolis en P0
   const ca_total = ca_silis + ca_exolis
   
   const mp_consommees = (P0_MP_COUT_UNITAIRE * prod_silis) / 1000
@@ -189,7 +223,9 @@ function recalculer() {
   const cout_stockage_pf = 1000 + stock_final_val * taux_stockage
   const cout_stockage_mp = P0_STOCK_MP_PREV * 0.05
   
-  const cout_logistique_total = 3200
+  const cout_logistique_fixe = nbUsines <= 21 ? 1500 : 2250
+  const cout_logistique_var = (getCoutLogistiqueUnit(P0_VENTES_SILIS) * P0_VENTES_SILIS) / 1000
+  const cout_logistique_total = cout_logistique_fixe + cout_logistique_var
   
   const charges_com_admin_total = effort_silis + effort_exolis + com_silis + com_exolis + 
                                  charges_admin + cout_stockage_pf + cout_stockage_mp + 
@@ -199,14 +235,13 @@ function recalculer() {
   const frais_financiers = P0_ENCOURS_LT * 0.06 / 4
   const resultat_avant_impot = resultat_operationnel - frais_financiers
   
-  // CALCUL IMPÔTS SELON MODE (SOLUTION CRITIQUE)
+  // CALCUL IMPÔTS SELON MODE
   let impots_finaux, mode_label
   
   if (mode_periode === 'P0') {
     impots_finaux = -203
     mode_label = 'Impôts (P0 historique)'
   } else {
-    // Mode P1+ : Règles Artémis 32%
     if (resultat_avant_impot > 0) {
       impots_finaux = resultat_avant_impot * 0.32
       mode_label = 'Impôts sur Sociétés (32%)'
@@ -218,7 +253,46 @@ function recalculer() {
   
   const resultat_net = resultat_avant_impot - impots_finaux
 
-  // Affichage
+  // === CALCULS TRÉSORERIE ===
+  
+  // Achats MP période avec barème dégressif
+  const total_mp_achetees = mp_stand + mp_green
+  const coeff_degressif = getBaremeMP(total_mp_achetees)
+  const cout_achats_mp = ((180 * mp_stand + 280 * mp_green) * coeff_degressif) / 1000
+  const achats_comptant = cout_achats_mp * 0.5
+  
+  // Ventes comptant + escompte
+  const ventes_comptant_base = ca_total * 0.5
+  const ventes_escompte = ca_total * 0.5 * (escompte_client / 100) * 0.15 // 15% acceptation
+  const ventes_comptant_total = ventes_comptant_base + ventes_escompte
+  
+  // Investissements et cessions usines
+  const investissements_usines = (achat_stand + achat_green) * 8000
+  const cessions_usines = (vente_stand + vente_green) * 8000
+  const cout_licenciement = (vente_stand * 600) + (vente_green * 900)
+  
+  // Flux opérationnels
+  const encaissements_op = P0_CREANCES + ventes_comptant_total + cessions_usines
+  const decaissements_production = energie + qual_silis + qual_exolis + dd_silis + dd_exolis + 
+                                  idh + main_oeuvre + encadrement + rd_stand + rd_green
+  const decaissements_op = P0_DETTES_FOURN + achats_comptant + decaissements_production + 
+                          effort_silis + effort_exolis + com_silis + com_exolis + charges_admin + 
+                          cout_logistique_total + cout_stockage_pf + cout_stockage_mp + 
+                          investissements_usines + cout_licenciement + 
+                          (mode_periode === 'P1' && impots_finaux > 0 ? impots_finaux : 0)
+  
+  const cashflow_op_net = encaissements_op - decaissements_op
+  
+  // Flux financiers
+  const remb_lt = 1250
+  const nouveaux_frais_fin = (emprunt_ct * 0.20 / 4) + (emprunt_lt * 0.06 / 4) // CT 20%, LT 6%
+  const cashflow_fin_net = emprunt_ct + emprunt_lt - remb_lt - frais_financiers - nouveaux_frais_fin
+  
+  // Trésorerie finale
+  const tresorerie_finale = P0_CASH_OPEN + cashflow_op_net + cashflow_fin_net
+
+  // === AFFICHAGE RÉSULTATS ===
+  
   document.getElementById('compte_resultat').textContent = 
     `CHIFFRE D'AFFAIRES : ${formatNumber(ca_total)} K€
   - Silis : ${formatNumber(ca_silis)} K€
@@ -241,7 +315,35 @@ RÉSULTAT AVANT IMPÔT : ${formatNumber(resultat_avant_impot)} K€
 ${mode_label} : ${formatNumber(impots_finaux)} K€
 RÉSULTAT NET : ${formatNumber(resultat_net)} K€`
 
-  // Validation
+  document.getElementById('tresorerie').textContent = 
+    `Trésorerie Début Période : ${formatNumber(P0_CASH_OPEN)} K€
+
+ENCAISSEMENTS :
+  - Créances Clients (T-1) : ${formatNumber(P0_CREANCES)} K€
+  - Ventes Comptant (50%) : ${formatNumber(ventes_comptant_base)} K€
+  - Escompte Client : ${formatNumber(ventes_escompte)} K€
+  - Cession Usines : ${formatNumber(cessions_usines)} K€
+  - Nouveaux Emprunts : ${formatNumber(emprunt_ct + emprunt_lt)} K€
+Total Encaissements : ${formatNumber(encaissements_op + emprunt_ct + emprunt_lt)} K€
+
+DÉCAISSEMENTS :
+  - Dettes Fournisseurs (T-1) : ${formatNumber(P0_DETTES_FOURN)} K€
+  - Achats MP Comptant : ${formatNumber(achats_comptant)} K€
+  - Production (hors amort.) : ${formatNumber(decaissements_production)} K€
+  - Commercial & Marketing : ${formatNumber(effort_silis + effort_exolis + com_silis + com_exolis)} K€
+  - Admin. & Logistique : ${formatNumber(charges_admin + cout_logistique_total + cout_stockage_pf + cout_stockage_mp)} K€
+  - Investissements Usines : ${formatNumber(investissements_usines)} K€
+  - Licenciements : ${formatNumber(cout_licenciement)} K€
+  - Remboursement LT : ${formatNumber(remb_lt)} K€
+  - Frais Financiers : ${formatNumber(frais_financiers + nouveaux_frais_fin)} K€
+  - Impôts (si dus) : ${formatNumber(mode_periode === 'P1' && impots_finaux > 0 ? impots_finaux : 0)} K€
+Total Décaissements : ${formatNumber(decaissements_op + remb_lt + frais_financiers + nouveaux_frais_fin)} K€
+
+Cash Flow Net : ${formatNumber(cashflow_op_net + cashflow_fin_net)} K€
+
+TRÉSORERIE FIN PÉRIODE : ${formatNumber(tresorerie_finale)} K€`
+
+  // Validation avec alertes liquidité
   if (mode_periode === 'P0') {
     const validation_ok = Math.abs(resultat_net + 1331) <= 1
     document.getElementById('validation_gate').innerHTML = 
@@ -250,9 +352,22 @@ RÉSULTAT NET : ${formatNumber(resultat_net)} K€`
         <div class="${validation_ok ? 'ok' : 'error'}">
           Résultat Net: ${formatNumber(resultat_net)} K€ (cible: -1,331 K€)
         </div>
+        <div class="ok">
+          Trésorerie finale: ${formatNumber(tresorerie_finale)} K€ 
+        </div>
       </div>`
   } else {
     const rentable = resultat_net > 0
+    const tresorerie_saine = tresorerie_finale > 1000
+    const seuil_equilibre = 547.5
+    
+    let alerte_liquidite = ''
+    if (tresorerie_finale < 0) {
+      alerte_liquidite = `<div class="liquidity-warning">⚠️ ALERTE LIQUIDITÉ: Trésorerie négative. Solutions: réduire achats MP, activer escompte client, emprunt CT</div>`
+    } else if (tresorerie_finale < 1000) {
+      alerte_liquidite = `<div class="liquidity-warning">⚠️ Trésorerie faible. Surveiller les flux P2</div>`
+    }
+    
     document.getElementById('validation_gate').innerHTML = 
       `<div class="validation simulation">
         <strong>🚀 Simulation P1+ : ${rentable ? 'STRATÉGIE RENTABLE ✅' : 'OPTIMISATION NÉCESSAIRE ⚠️'}</strong>
@@ -260,6 +375,14 @@ RÉSULTAT NET : ${formatNumber(resultat_net)} K€`
           Résultat Net: ${formatNumber(resultat_net)} K€
           ${resultat_avant_impot > 0 ? `(IS payé: ${formatNumber(impots_finaux)} K€)` : '(Aucun impôt sur perte)'}
         </div>
+        <div class="info" style="margin-top:8px">
+          Trésorerie finale: ${formatNumber(tresorerie_finale)} K€ ${tresorerie_saine ? '✅' : '⚠️'}
+        </div>
+        <div style="margin-top:8px;font-size:11px">
+          Prix actuel: ${prix_silis}€ | Seuil équilibre: ${seuil_equilibre}€
+          ${prix_silis >= seuil_equilibre ? '✅' : '⚠️ Prix insuffisant'}
+        </div>
+        ${alerte_liquidite}
       </div>`
   }
 }
