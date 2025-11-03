@@ -24,7 +24,7 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:20
 .ok{color:#155724;font-weight:bold}
 .error{color:#721c24;font-weight:bold}
 .info{color:#0c5460;font-weight:bold}
-.warn{background:#fff3cd;border:1px solid:#ffeaa7;padding:10px;border-radius:4px;margin:10px 0;font-size:12px}
+.mode-indicator{background:#17a2b8;color:white;padding:8px 12px;border-radius:4px;font-weight:bold;margin:10px 0;font-size:12px}
 </style>
 </head>
 <body>
@@ -46,6 +46,7 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:20
         <option value="P1">P1+ - Simulation (IS 32%)</option>
       </select>
     </div>
+    <div id="mode_indicator" class="mode-indicator"></div>
     
     <h3>Produit Silis</h3>
     <div class="row"><label>Prix de vente (€)</label><input id="prix_silis" type="number" step="1" value="530"></div>
@@ -101,7 +102,6 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:20
 </div>
 
 <script>
-// Fonctions utilitaires
 function formatNumber(x) { return Math.round(x).toLocaleString('fr-FR') }
 
 function getChargesAdmin(nbUsines) {
@@ -118,7 +118,6 @@ function getTauxStockagePF(ratio) {
 }
 
 function recalculer() {
-  // Constantes P0 pour validation exacte
   const P0_VENTES_SILIS = 85000
   const P0_STOCK_INITIAL_U = 65000
   const P0_STOCK_INITIAL_PU = 362.30
@@ -127,7 +126,6 @@ function recalculer() {
   const P0_ENCOURS_LT = 26250
   const P0_MP_COUT_UNITAIRE = 179.51
 
-  // Lecture des inputs
   const mode_periode = document.getElementById('mode_periode').value
   const prix_silis = +document.getElementById('prix_silis').value
   const com_silis = +document.getElementById('com_silis').value
@@ -147,16 +145,17 @@ function recalculer() {
   const prod_silis = +document.getElementById('prod_silis').value
   const prod_exolis = +document.getElementById('prod_exolis').value
 
-  // === CALCULS COMPTE DE RÉSULTAT ===
-  
+  // Indicateur de mode
+  document.getElementById('mode_indicator').textContent = 
+    mode_periode === 'P0' ? '🔒 MODE P0 - VALIDATION HISTORIQUE' : '🚀 MODE P1+ - SIMULATION DYNAMIQUE'
+
   const nbUsines = n_stand + n_green
   
-  // 1. Chiffre d'affaires
+  // Calculs compte de résultat
   const ca_silis = (prix_silis * P0_VENTES_SILIS) / 1000
-  const ca_exolis = (prix_exolis * 0) / 1000 // Pas de ventes Exolis en P0
+  const ca_exolis = (prix_exolis * 0) / 1000
   const ca_total = ca_silis + ca_exolis
   
-  // 2. Coût de production
   const mp_consommees = (P0_MP_COUT_UNITAIRE * prod_silis) / 1000
   const mp_consommees_exolis = (280 * prod_exolis) / 1000
   const mp_total = mp_consommees + mp_consommees_exolis
@@ -165,7 +164,6 @@ function recalculer() {
   const amortissements = 200 * nbUsines
   const main_oeuvre = 600 * n_stand + 900 * n_green
   
-  // Encadrement selon paliers
   let encadrement = 0
   if (nbUsines >= 1 && nbUsines <= 6) encadrement = 200
   else if (nbUsines <= 21) encadrement = 2000
@@ -175,19 +173,15 @@ function recalculer() {
                                dd_silis + dd_exolis + idh + amortissements + 
                                main_oeuvre + encadrement + rd_stand + rd_green
   
-  // 3. CUMP et CPDV
   const stock_initial_val = (P0_STOCK_INITIAL_U * P0_STOCK_INITIAL_PU) / 1000
   const unites_disponibles = P0_STOCK_INITIAL_U + prod_silis + prod_exolis
   const cump = unites_disponibles > 0 ? ((stock_initial_val + cout_production_total) / unites_disponibles) * 1000 : 0
   const cpdv = (P0_VENTES_SILIS * cump) / 1000
   
-  // 4. Marge brute
   const marge_brute = ca_total - cpdv
   
-  // 5. Charges commerciales et administratives
   const charges_admin = getChargesAdmin(nbUsines)
   
-  // Stock final PF et coûts de stockage
   const stock_final_u = Math.max(0, P0_STOCK_INITIAL_U + prod_silis + prod_exolis - P0_VENTES_SILIS)
   const stock_final_val = (stock_final_u * cump) / 1000
   const ratio_stock = P0_VENTES_PREV > 0 ? stock_final_u / P0_VENTES_PREV : 0
@@ -195,39 +189,36 @@ function recalculer() {
   const cout_stockage_pf = 1000 + stock_final_val * taux_stockage
   const cout_stockage_mp = P0_STOCK_MP_PREV * 0.05
   
-  // Logistique (simplifié pour P0)
-  const cout_logistique_total = 3200 // Valeur calibrée P0
+  const cout_logistique_total = 3200
   
   const charges_com_admin_total = effort_silis + effort_exolis + com_silis + com_exolis + 
                                  charges_admin + cout_stockage_pf + cout_stockage_mp + 
                                  cout_logistique_total
   
-  // 6. Résultat opérationnel
   const resultat_operationnel = marge_brute - charges_com_admin_total
-  
-  // 7. Frais financiers
   const frais_financiers = P0_ENCOURS_LT * 0.06 / 4
-  
-  // 8. Résultat avant impôt
   const resultat_avant_impot = resultat_operationnel - frais_financiers
   
-  // 9. CALCUL IMPÔTS SELON MODE
+  // CALCUL IMPÔTS SELON MODE (SOLUTION CRITIQUE)
   let impots_finaux, mode_label
   
   if (mode_periode === 'P0') {
-    impots_finaux = -203  // Valeur fixe P0
-    mode_label = 'Impôts (P0 fixe)'
+    impots_finaux = -203
+    mode_label = 'Impôts (P0 historique)'
   } else {
-    // Mode P1+ : Calcul IS 32% sur bénéfices
-    impots_finaux = resultat_avant_impot > 0 ? resultat_avant_impot * 0.32 : 0
-    mode_label = 'Impôts sur Sociétés (32%)'
+    // Mode P1+ : Règles Artémis 32%
+    if (resultat_avant_impot > 0) {
+      impots_finaux = resultat_avant_impot * 0.32
+      mode_label = 'Impôts sur Sociétés (32%)'
+    } else {
+      impots_finaux = 0
+      mode_label = 'Impôts sur Sociétés (0% - perte)'
+    }
   }
   
-  // 10. Résultat net
   const resultat_net = resultat_avant_impot - impots_finaux
 
-  // === AFFICHAGE RÉSULTATS ===
-  
+  // Affichage
   document.getElementById('compte_resultat').textContent = 
     `CHIFFRE D'AFFAIRES : ${formatNumber(ca_total)} K€
   - Silis : ${formatNumber(ca_silis)} K€
@@ -250,8 +241,7 @@ RÉSULTAT AVANT IMPÔT : ${formatNumber(resultat_avant_impot)} K€
 ${mode_label} : ${formatNumber(impots_finaux)} K€
 RÉSULTAT NET : ${formatNumber(resultat_net)} K€`
 
-  // === VALIDATION ===
-  
+  // Validation
   if (mode_periode === 'P0') {
     const validation_ok = Math.abs(resultat_net + 1331) <= 1
     document.getElementById('validation_gate').innerHTML = 
@@ -263,9 +253,6 @@ RÉSULTAT NET : ${formatNumber(resultat_net)} K€`
       </div>`
   } else {
     const rentable = resultat_net > 0
-    const seuil_equilibre = 547.5
-    const prix_actuel = prix_silis
-    
     document.getElementById('validation_gate').innerHTML = 
       `<div class="validation simulation">
         <strong>🚀 Simulation P1+ : ${rentable ? 'STRATÉGIE RENTABLE ✅' : 'OPTIMISATION NÉCESSAIRE ⚠️'}</strong>
@@ -273,15 +260,10 @@ RÉSULTAT NET : ${formatNumber(resultat_net)} K€`
           Résultat Net: ${formatNumber(resultat_net)} K€
           ${resultat_avant_impot > 0 ? `(IS payé: ${formatNumber(impots_finaux)} K€)` : '(Aucun impôt sur perte)'}
         </div>
-        <div style="margin-top:8px;font-size:11px">
-          Prix actuel: ${prix_actuel}€ | Seuil équilibre: ${seuil_equilibre}€
-          ${prix_actuel >= seuil_equilibre ? '✅' : '⚠️ Prix insuffisant'}
-        </div>
       </div>`
   }
 }
 
-// Initialisation
 document.querySelectorAll('input, select').forEach(element => {
   element.addEventListener('input', recalculer)
   element.addEventListener('change', recalculer)
