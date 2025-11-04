@@ -24,14 +24,14 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:20
 .ok{color:#155724;font-weight:bold}
 .error{color:#721c24;font-weight:bold}
 .info{color:#0c5460;font-weight:bold}
-.impots-dynamic{background:#e3f2fd;border:1px solid:#90caf9;padding:8px;border-radius:4px;margin:5px 0;font-size:11px;color:#1565c0}
+.impots-info{background:#e3f2fd;border:1px solid:#90caf9;padding:8px;border-radius:4px;margin:5px 0;font-size:11px;color:#1565c0}
 </style>
 </head>
 <body>
 
 <div class="header">
   <h1>Artémis Simulateur - Décisions Firme 3</h1>
-  <div class="subtitle">Impôts dynamiques selon vos décisions | Trésorerie complète</div>
+  <div class="subtitle">Logique fiscale clarifiée : -203 K€ = Économie fiscale P0 | Calculs dynamiques P1+</div>
 </div>
 
 <div class="grid">
@@ -42,7 +42,7 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:20
     <div class="row">
       <label>Période de simulation</label>
       <select id="mode_periode">
-        <option value="P0">P0 - Validation (-203 K€)</option>
+        <option value="P0">P0 - Validation (économie -203 K€)</option>
         <option value="P1">P1+ - Simulation (IS 32%)</option>
       </select>
     </div>
@@ -91,7 +91,7 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:20
     <div class="row"><label>Escompte client (%)</label><input id="escompte_client" type="number" step="0.1" value="0"></div>
     <div class="row"><label>Effets escomptés bancaires (k€)</label><input id="effets_escomptes" type="number" step="1" value="0"></div>
 
-    <div id="impots_info" class="impots-dynamic"></div>
+    <div id="impots_info" class="impots-info"></div>
   </div>
 
   <div class="card">
@@ -231,29 +231,33 @@ function recalculer() {
   const frais_financiers = P0_ENCOURS_LT * 0.06 / 4
   const resultat_avant_impot = resultat_operationnel - frais_financiers
   
-  // === CALCUL IMPÔTS DYNAMIQUES SELON VOS DÉCISIONS ===
-  let impots_finaux, mode_label, info_impots
+  // === LOGIQUE FISCALE CLARIFIÉE ===
+  let impots_comptables, impots_tresorerie, mode_label, info_impots
   
   if (mode_periode === 'P0') {
-    impots_finaux = -203
-    mode_label = 'Impôts (P0 historique)'
-    info_impots = '🔒 Mode P0 : Impôts fixes à -203 K€ pour validation exacte'
+    // P0 : Économie fiscale historique
+    impots_comptables = -203  // Améliore le résultat comptable
+    impots_tresorerie = 0     // Aucun flux de trésorerie
+    mode_label = 'Impôts sur Sociétés (économie fiscale)'
+    info_impots = '💰 P0 : Économie fiscale -203 K€ améliore le résultat | Aucun décaissement'
   } else {
-    // MODE P1+ : IMPÔTS DYNAMIQUES SELON VOS DÉCISIONS
+    // P1+ : Règles fiscales Artémis standards
     if (resultat_avant_impot > 0) {
-      impots_finaux = resultat_avant_impot * 0.32
+      impots_comptables = resultat_avant_impot * 0.32
+      impots_tresorerie = impots_comptables
       mode_label = 'Impôts sur Sociétés (32%)'
-      info_impots = `🧮 Calcul automatique : ${formatNumber(resultat_avant_impot)} × 32% = ${formatNumber(impots_finaux)} K€`
+      info_impots = `💸 IS calculé automatiquement : ${formatNumber(resultat_avant_impot)} × 32% = ${formatNumber(impots_comptables)} K€`
     } else {
-      impots_finaux = 0
+      impots_comptables = 0
+      impots_tresorerie = 0
       mode_label = 'Impôts sur Sociétés (0% - perte)'
-      info_impots = `💸 Résultat déficitaire : Aucun impôt à payer (${formatNumber(resultat_avant_impot)} K€)`
+      info_impots = `📊 Résultat déficitaire : Aucun impôt à payer (${formatNumber(resultat_avant_impot)} K€)`
     }
   }
   
-  const resultat_net = resultat_avant_impot - impots_finaux
+  const resultat_net = resultat_avant_impot - impots_comptables
 
-  // Affichage info impôts
+  // Affichage explicatif
   document.getElementById('impots_info').textContent = info_impots
 
   // === CALCULS TRÉSORERIE ===
@@ -274,11 +278,11 @@ function recalculer() {
   const encaissements_op = P0_CREANCES + ventes_comptant_total + cessions_usines
   const decaissements_production = energie + qual_silis + qual_exolis + dd_silis + dd_exolis + 
                                   idh + main_oeuvre + encadrement + rd_stand + rd_green
+  
   const decaissements_op = P0_DETTES_FOURN + achats_comptant + decaissements_production + 
                           effort_silis + effort_exolis + com_silis + com_exolis + charges_admin + 
                           cout_logistique_total + cout_stockage_pf + cout_stockage_mp + 
-                          investissements_usines + cout_licenciement + 
-                          (mode_periode === 'P1' && impots_finaux > 0 ? impots_finaux : 0)
+                          investissements_usines + cout_licenciement + impots_tresorerie
   
   const cashflow_op_net = encaissements_op - decaissements_op
   
@@ -309,7 +313,7 @@ Charges Commerciales et Administratives : ${formatNumber(charges_com_admin_total
 RÉSULTAT OPÉRATIONNEL : ${formatNumber(resultat_operationnel)} K€
 Frais Financiers : ${formatNumber(frais_financiers)} K€
 RÉSULTAT AVANT IMPÔT : ${formatNumber(resultat_avant_impot)} K€
-${mode_label} : ${formatNumber(impots_finaux)} K€
+${mode_label} : ${formatNumber(impots_comptables)} K€
 RÉSULTAT NET : ${formatNumber(resultat_net)} K€`
 
   document.getElementById('tresorerie').textContent = 
@@ -333,14 +337,14 @@ DÉCAISSEMENTS :
   - Licenciements : ${formatNumber(cout_licenciement)} K€
   - Remboursement LT : ${formatNumber(remb_lt)} K€
   - Frais Financiers : ${formatNumber(frais_financiers + nouveaux_frais_fin)} K€
-  - Impôts (si dus) : ${formatNumber(mode_periode === 'P1' && impots_finaux > 0 ? impots_finaux : 0)} K€
+  - Impôts décaissés : ${formatNumber(impots_tresorerie)} K€
 Total Décaissements : ${formatNumber(decaissements_op + remb_lt + frais_financiers + nouveaux_frais_fin)} K€
 
 Cash Flow Net : ${formatNumber(cashflow_op_net + cashflow_fin_net)} K€
 
 TRÉSORERIE FIN PÉRIODE : ${formatNumber(tresorerie_finale)} K€`
 
-  // Validation
+  // Validation avec explications claires
   if (mode_periode === 'P0') {
     const validation_ok = Math.abs(resultat_net + 1331) <= 1
     document.getElementById('validation_gate').innerHTML = 
@@ -349,8 +353,11 @@ TRÉSORERIE FIN PÉRIODE : ${formatNumber(tresorerie_finale)} K€`
         <div class="${validation_ok ? 'ok' : 'error'}">
           Résultat Net: ${formatNumber(resultat_net)} K€ (cible: -1,331 K€)
         </div>
-        <div class="ok">
-          Trésorerie finale: ${formatNumber(tresorerie_finale)} K€ 
+        <div class="info">
+          Logique: Économie fiscale -203 K€ améliore le résultat de +203 K€
+        </div>
+        <div class="info">
+          Trésorerie: Aucun décaissement IS (${formatNumber(impots_tresorerie)} K€)
         </div>
       </div>`
   } else {
@@ -362,13 +369,13 @@ TRÉSORERIE FIN PÉRIODE : ${formatNumber(tresorerie_finale)} K€`
         <strong>🚀 Simulation P1+ : ${rentable ? 'STRATÉGIE RENTABLE ✅' : 'OPTIMISATION NÉCESSAIRE ⚠️'}</strong>
         <div class="info">
           Résultat Net: ${formatNumber(resultat_net)} K€
-          ${resultat_avant_impot > 0 ? `(IS calculé: ${formatNumber(impots_finaux)} K€)` : '(Aucun impôt sur perte)'}
+          ${impots_comptables > 0 ? `(IS automatique: ${formatNumber(impots_tresorerie)} K€)` : '(Aucun impôt sur perte)'}
         </div>
         <div class="info" style="margin-top:8px">
           Trésorerie finale: ${formatNumber(tresorerie_finale)} K€ ${tresorerie_saine ? '✅' : '⚠️'}
         </div>
         <div style="margin-top:8px;font-size:11px">
-          💡 Les impôts varient automatiquement selon vos décisions (32% sur bénéfices)
+          💡 Les impôts s'adaptent automatiquement à vos décisions
         </div>
       </div>`
   }
